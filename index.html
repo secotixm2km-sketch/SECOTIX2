@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECOTIX PRO - Monitoring System & Environmental Audit</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #151c2c;
+            --bg-card-hover: #1e293b;
+            --border-color: #2a364f;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+
+            /* Background Batik Transparan / Subtle Overlay */
+            background-image:
+                linear-gradient(rgba(11, 15, 25, 0.92), rgba(11, 15, 25, 0.96)),
+                url('batik.jpg');
+            /* Jika ada file batik.jpg di folder yang sama */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+
+        /* Navbar & Header */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(21, 28, 44, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .brand-text h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-text p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .system-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-pill.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.3;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Banner Audit Baku Mutu & Efisiensi */
+        .banner-audit {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media(max-width: 992px) {
+            .banner-audit {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .audit-card {
+            background: linear-gradient(135deg, rgba(21, 28, 44, 0.9), rgba(30, 41, 59, 0.8));
+            border: 1px solid var(--border-color);
+            padding: 20px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .audit-info h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .audit-info .audit-status-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .audit-badge-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        /* Grid Kartu Metric Sensor */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: rgba(21, 28, 44, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 12px 0 4px 0;
+        }
+
+        .metric-unit {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .metric-sub {
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Main Section Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media(max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-box {
+            background: rgba(21, 28, 44, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .box-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Control Panel Items */
+        .control-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(11, 15, 25, 0.6);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .control-desc h5 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .control-desc p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Switch Toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #334155;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Tabel Perbandingan Baku Mutu Permen LH Terbaru */
+        .compliance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .compliance-table th {
+            text-align: left;
+            padding: 12px;
+            background: rgba(11, 15, 25, 0.8);
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .compliance-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+
+        .tag-safe {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .tag-warning {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-action {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            padding: 20px 0;
+        }
+    </style>
+    <style>
+        /* CSS Tambahan agar konten tidak meluber ke kanan-kiri di HP */
+        body,
+        html {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        /* Memaksa gambar dan wadah agar melar sesuai ukuran layar */
+        img,
+        table,
+        .container,
+        .card,
+        div {
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        /* Media query darurat untuk HP (Layar di bawah 768px) */
+        @media (max-width: 768px) {
+
+            /* Jika kodemu pakai flexbox, ini memaksanya turun ke bawah (vertikal) */
+            .row,
+            .d-flex,
+            .flex-row {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Memaksa elemen yang tadinya selebar 50% atau 33% jadi 100% (penuh) di HP */
+            .col,
+            .col-md-4,
+            .col-md-6,
+            .col-lg-3,
+            .col-lg-4,
+            .col-sm-12 {
+                width: 100% !important;
+                margin-bottom: 15px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <div class="brand-title">
+            <div class="brand-logo"><i class="fa-solid fa-water-waves"></i></div>
+            <div class="brand-text">
+                <h1>SECOTIX PRO - MONITORING SYSTEM</h1>
+                <p>Electrocoagulation & Advanced Hybrid Wastewater Treatment</p>
+            </div>
+        </div>
+        <div class="system-meta">
+            <div id="connection-pill" class="status-pill">
+                <div class="pulse"></div>
+                <span id="connection-text">CONNECTING...</span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-muted);" id="live-clock">00:00:00 WIB
+            </div>
+        </div>
+    </div>
+
+    <div class="banner-audit">
+        <div class="audit-card">
+            <div class="audit-info">
+                <h4>Status Kelayakan Lingkungan (Permen LH No. 12 Tahun 2025)</h4>
+                <div id="audit-status" class="audit-status-text" style="color: var(--accent-yellow);">MENUNGGU
+                    ANALISIS...</div>
+            </div>
+            <div class="audit-badge-icon" id="audit-icon" style="color: var(--accent-yellow);">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+        </div>
+
+        <div class="audit-card">
+            <div class="audit-info">
+                <h4>Efisiensi Filtrasi (% Reduksi)</h4>
+                <div id="efficiency-value" class="audit-status-text" style="color: var(--accent-cyan);">0.0 %</div>
+            </div>
+            <div class="audit-badge-icon" style="color: var(--accent-cyan);">
+                <i class="fa-solid fa-chart-line-up"></i>
+            </div>
+        </div>
+
+        <div class="audit-card">
+            <div class="audit-info">
+                <h4>Estimasi Biaya Pengolahan</h4>
+                <div id="cost-value" class="audit-status-text" style="color: var(--accent-green);">Rp 0 / L</div>
+            </div>
+            <div class="audit-badge-icon" style="color: var(--accent-green);">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>DERAJAT KEASAMAN (pH)</span>
+                <i class="fa-solid fa-vial" style="color: var(--accent-red);"></i>
+            </div>
+            <div class="metric-value"><span id="val-ph">0.0</span></div>
+            <div class="metric-sub" id="sub-ph"><i class="fa-solid fa-circle-info"></i> Ambang Baku Mutu: 6.0 - 9.0
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>KEKERUHAN (TURBIDITY / TSS)</span>
+                <i class="fa-solid fa-eye-dropper" style="color: var(--accent-yellow);"></i>
+            </div>
+            <div class="metric-value"><span id="val-turbidity">0.0</span> <span class="metric-unit">NTU</span></div>
+            <div class="metric-sub" id="sub-turbidity"><i class="fa-solid fa-circle-info"></i> Target TSS: &le; 50.0 NTU
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>PADATAN TERLARUT (TDS)</span>
+                <i class="fa-solid fa-filter" style="color: var(--accent-blue);"></i>
+            </div>
+            <div class="metric-value"><span id="val-tds">0</span> <span class="metric-unit">PPM</span></div>
+            <div class="metric-sub" id="sub-tds"><i class="fa-solid fa-circle-info"></i> Target: &le; 1000 PPM</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>DEBIT AIR (FLOW RATE)</span>
+                <i class="fa-solid fa-gauge-high" style="color: var(--accent-cyan);"></i>
+            </div>
+            <div class="metric-value"><span id="val-flow">0.0</span> <span class="metric-unit">L/Min</span></div>
+            <div class="metric-sub" style="color: var(--text-muted);"><i class="fa-solid fa-faucet-drip"></i> Total
+                diolah: <span id="val-total-volume">0</span> Liter</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-header">
+                <span>KONSUMSI DAYA (EC)</span>
+                <i class="fa-solid fa-bolt" style="color: var(--accent-purple);"></i>
+            </div>
+            <div class="metric-value"><span id="val-power">0.0</span> <span class="metric-unit">Watt</span></div>
+            <div class="metric-sub" style="color: var(--text-muted);"><i class="fa-solid fa-plug"></i> Est. Energi:
+                <span id="val-kwh">0.00</span> kWh
+            </div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="section-box">
+            <div class="box-header">
+                <h3><i class="fa-solid fa-chart-area" style="color: var(--accent-cyan);"></i> Grafik Kualitas Air & Tren
+                    Filtrasi</h3>
+                <button class="btn-action" onclick="exportDataCSV()">
+                    <i class="fa-solid fa-download"></i> Unduh Laporan (.CSV)
+                </button>
+            </div>
+            <div style="position: relative; height: 340px;">
+                <canvas id="industrialChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box-header">
+                <h3><i class="fa-solid fa-sliders" style="color: var(--accent-green);"></i> Kontrol Aktuator</h3>
+                <span
+                    style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); padding: 4px 10px; border-radius: 6px; font-weight: 700;">REMOTE
+                    CONTROL</span>
+            </div>
+            <div class="control-list">
+                <div class="control-item">
+                    <div class="control-desc">
+                        <h5>Pompa Sirkulasi (DP-537)</h5>
+                        <p>Mengalirkan air limbah ke reaktor EC</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="btn-pompa" onchange="sendControl('pompa', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-desc">
+                        <h5>Power Reaktor Elektrokoagulasi</h5>
+                        <p>Catu daya DC plat Aluminium</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="btn-ec" onchange="sendControl('ec', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-item">
+                    <div class="control-desc">
+                        <h5>Kran Pengurasan (Drain Valve)</h5>
+                        <p>Pengurasan otomatis sisa air di tabung</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="btn-drain" onchange="sendControl('drain', this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-box" style="margin-bottom: 24px;">
+        <div class="box-header">
+            <h3><i class="fa-solid fa-file-contract" style="color: var(--accent-yellow);"></i> Tabel Komparasi Audit
+                Baku Mutu Air Limbah Batik</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Standar Hukum: <b>Permen LH/BPLH RI No. 12 Tahun
+                    2025</b></span>
+        </div>
+        <table class="compliance-table">
+            <thead>
+                <tr>
+                    <th>Parameter Sifat Air</th>
+                    <th>Limbah Mentah (Inlet)</th>
+                    <th>Hasil Olahan SECOTIX (Outlet)</th>
+                    <th>Baku Mutu Maksimal</th>
+                    <th>Status Kepatuhan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Derajat Keasaman (pH)</td>
+                    <td><span id="raw-ph">10.5</span> (Basa)</td>
+                    <td><span id="tab-ph">--</span></td>
+                    <td>6.0 - 9.0</td>
+                    <td><span id="tag-ph" class="tag-warning">Mengecek...</span></td>
+                </tr>
+                <tr>
+                    <td>Kekeruhan (TSS / Turbidity)</td>
+                    <td><span id="raw-turbidity">250.0</span> NTU</td>
+                    <td><span id="tab-turbidity">--</span> NTU</td>
+                    <td>&le; 50.0 NTU</td>
+                    <td><span id="tag-turbidity" class="tag-warning">Mengecek...</span></td>
+                </tr>
+                <tr>
+                    <td>Padatan Terlarut (TDS)</td>
+                    <td><span id="raw-tds">1800</span> PPM</td>
+                    <td><span id="tab-tds">--</span> PPM</td>
+                    <td>&le; 1000 PPM</td>
+                    <td><span id="tag-tds" class="tag-warning">Mengecek...</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>SECOTIX IoT System &copy; 2026 - Riset Pengolahan Limbah Cair Industri Batik | Tim Riset KIR & OPSI</p>
+    </div>
+
+    <script>
+        // -------------------------------------------------------------
+        // 1. CONFIG FIREBASE REALTIME DATABASE MILIK SECOTIX
+        // -------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrLZ5eQ4emLp7rzEhVmuV_O_xYvG5gnM4",
+            authDomain: "secotix.firebaseapp.com",
+            databaseURL: "https://secotix-default-rtdb.firebaseio.com",
+            projectId: "secotix",
+            storageBucket: "secotix.firebasestorage.app",
+            messagingSenderId: "25188283346",
+            appId: "1:25188283346:web:9656cbfd51fbcf6c8e4e0b"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Data Acuan Air Limbah Mentah Batik (Baseline awal)
+        const RAW_INLET = { ph: 10.5, turbidity: 250.0, tds: 1800 };
+        const dataLogHistory = [];
+
+        // -------------------------------------------------------------
+        // 2. CHART.JS CONFIGURATION
+        // -------------------------------------------------------------
+        const ctx = document.getElementById('industrialChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'pH',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        data: [], yAxisID: 'y-ph', tension: 0.3, fill: true
+                    },
+                    {
+                        label: 'Turbidity (NTU)',
+                        borderColor: '#f59e0b',
+                        data: [], yAxisID: 'y-main', tension: 0.3
+                    },
+                    {
+                        label: 'TDS (PPM)',
+                        borderColor: '#3b82f6',
+                        data: [], yAxisID: 'y-main', tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { color: '#2a364f' }, ticks: { color: '#94a3b8' } },
+                    'y-ph': {
+                        type: 'linear', position: 'left', min: 0, max: 14,
+                        grid: { color: '#2a364f' }, ticks: { color: '#ef4444' },
+                        title: { display: true, text: 'pH Level', color: '#ef4444' }
+                    },
+                    'y-main': {
+                        type: 'linear', position: 'right',
+                        grid: { drawOnChartArea: false }, ticks: { color: '#38bdf8' },
+                        title: { display: true, text: 'TDS (PPM) & Turbidity (NTU)', color: '#38bdf8' }
+                    }
+                },
+                plugins: { legend: { labels: { color: '#f8fafc' } } }
+            }
+        });
+
+        // -------------------------------------------------------------
+        // 3. LISTEN DATA REALTIME DARI FIREBASE
+        // -------------------------------------------------------------
+        db.ref('secotix/sensor').on('value', (snapshot) => {
+            const data = snapshot.val();
+
+            // Update Status Connection Pill
+            const pill = document.getElementById('connection-pill');
+            pill.classList.add('active');
+            document.getElementById('connection-text').innerText = 'SYSTEM LIVE';
+
+            if (data) {
+                // Parsing Data (Membaca ph, pH, atau PH secara aman)
+                const ph = parseFloat(data.ph || data.pH || data.PH || 7.0);
+                const turbidity = parseFloat(data.turbidity || data.Turbidity || 0);
+                const tds = parseInt(data.tds || data.TDS || 0);
+                const flow = parseFloat(data.flow || 0);
+                const totalVol = parseFloat(data.total_volume || 0);
+                const power = parseFloat(data.power || 0);
+                const kwh = parseFloat(data.kwh || 0);
+
+                // 1. Display ke Kartu Metric
+                document.getElementById('val-ph').innerText = ph.toFixed(1);
+                document.getElementById('val-turbidity').innerText = turbidity.toFixed(1);
+                document.getElementById('val-tds').innerText = tds;
+                document.getElementById('val-flow').innerText = flow.toFixed(1);
+                document.getElementById('val-total-volume').innerText = totalVol.toFixed(1);
+                document.getElementById('val-power').innerText = power.toFixed(1);
+                document.getElementById('val-kwh').innerText = kwh.toFixed(2);
+
+                // 2. Hitung Efisiensi Reduksi Polutan (%)
+                const effTurbidity = Math.max(0, ((RAW_INLET.turbidity - turbidity) / RAW_INLET.turbidity) * 100);
+                document.getElementById('efficiency-value').innerText = effTurbidity.toFixed(1) + ' %';
+
+                // 3. Hitung Estimasi Biaya Listrik Operasional per Liter
+                const totalCostRp = kwh * 1444;
+                const costPerLiter = totalVol > 0 ? (totalCostRp / totalVol) : 0;
+                document.getElementById('cost-value').innerText = `Rp ${costPerLiter.toFixed(1)} / L`;
+
+                // 4. Analisis Baku Mutu Permen LH/BPLH RI No. 12 Tahun 2025
+                evaluateCompliance(ph, turbidity, tds);
+
+                // 5. Update Live Chart
+                const now = new Date().toLocaleTimeString('id-ID');
+                if (chart.data.labels.length > 15) {
+                    chart.data.labels.shift();
+                    chart.data.datasets[0].data.shift();
+                    chart.data.datasets[1].data.shift();
+                    chart.data.datasets[2].data.shift();
+                }
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(ph);
+                chart.data.datasets[1].data.push(turbidity);
+                chart.data.datasets[2].data.push(tds);
+                chart.update();
+
+                // Log untuk CSV
+                dataLogHistory.push({ time: now, ph: ph, turbidity: turbidity, tds: tds, flow: flow, kwh: kwh });
+            } else {
+                document.getElementById('audit-status').innerText = 'SIAP MENERIMA DATA SENSOR';
+                document.getElementById('audit-status').style.color = 'var(--accent-cyan)';
+            }
+        });
+
+        // -------------------------------------------------------------
+        // 4. EVALUASI BAKU MUTU & TABEL KOMPARASI (PERMEN LH 12/2025)
+        // -------------------------------------------------------------
+        function evaluateCompliance(ph, turbidity, tds) {
+            document.getElementById('tab-ph').innerText = ph.toFixed(1);
+            document.getElementById('tab-turbidity').innerText = turbidity.toFixed(1);
+            document.getElementById('tab-tds').innerText = tds;
+
+            const isPhSafe = (ph >= 6.0 && ph <= 9.0);
+            const isTurbSafe = (turbidity <= 50.0); // Ambang batas TSS / Turbidity Permen LH 2025
+            const isTdsSafe = (tds <= 1000);
+
+            // Update Tags Tabel
+            setTag('tag-ph', isPhSafe);
+            setTag('tag-turbidity', isTurbSafe);
+            setTag('tag-tds', isTdsSafe);
+
+            // Update Banner Status Keseluruhan
+            const bannerText = document.getElementById('audit-status');
+            const bannerIcon = document.getElementById('audit-icon');
+
+            if (isPhSafe && isTurbSafe && isTdsSafe) {
+                bannerText.innerText = "MEMENUHI BAKU MUTU (LAYAK BUANG)";
+                bannerText.style.color = "var(--accent-green)";
+                bannerIcon.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+                bannerIcon.style.color = "var(--accent-green)";
+            } else {
+                bannerText.innerText = "BELUM MEMENUHI BAKU MUTU";
+                bannerText.style.color = "var(--accent-red)";
+                bannerIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i>`;
+                bannerIcon.style.color = "var(--accent-red)";
+            }
+        }
+
+        function setTag(elemId, isSafe) {
+            const elem = document.getElementById(elemId);
+            if (isSafe) {
+                elem.className = 'tag-safe';
+                elem.innerText = 'MEMENUHI';
+            } else {
+                elem.className = 'tag-warning';
+                elem.innerText = 'MELEBIHI BATAS';
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 5. KONTROL RELAY DARI WEB DASHBOARD
+        // -------------------------------------------------------------
+        function sendControl(device, state) {
+            db.ref('secotix/kontrol/' + device).set(state)
+                .then(() => console.log(`${device} status updated: ${state}`))
+                .catch(err => alert("Gagal konek Firebase: " + err.message));
+        }
+
+        // Sync Switch State
+        db.ref('secotix/kontrol').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('btn-pompa').checked = !!data.pompa;
+                document.getElementById('btn-ec').checked = !!data.ec;
+                document.getElementById('btn-drain').checked = !!data.drain;
+            }
+        });
+
+        // Live Clock
+        setInterval(() => {
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
+        }, 1000);
+
+        // Export Data CSV Laporan
+        function exportDataCSV() {
+            if (dataLogHistory.length === 0) {
+                alert("Belum ada data sensor yang dapat diunduh!");
+                return;
+            }
+            let csv = "Timestamp,pH,Turbidity (NTU),TDS (PPM),Flow Rate (L/min),Energi (kWh)\n";
+            dataLogHistory.forEach(row => {
+                csv += `${row.time},${row.ph},${row.turbidity},${row.tds},${row.flow},${row.kwh}\n`;
+            });
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = `Laporan_Audit_SECOTIX_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>
