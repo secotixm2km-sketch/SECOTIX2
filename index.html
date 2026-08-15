@@ -2,9 +2,8 @@
 <html lang="id">
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SECOTIX PRO - Monitoring System & Environmental Audit</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap"
@@ -13,7 +12,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -39,17 +37,21 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        body {
+        body,
+        html {
             background-color: var(--bg-main);
             color: var(--text-primary);
-            padding: 24px;
             min-height: 100vh;
+            overflow-x: hidden;
+            /* Cegah layar geser kanan-kiri di HP */
+            width: 100%;
+        }
 
-            /* Background Batik Transparan / Subtle Overlay */
+        body {
+            padding: 24px;
             background-image:
                 linear-gradient(rgba(11, 15, 25, 0.92), rgba(11, 15, 25, 0.96)),
                 url('batik.jpg');
-            /* Jika ada file batik.jpg di folder yang sama */
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -67,6 +69,9 @@
             border: 1px solid var(--border-color);
             margin-bottom: 24px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            flex-wrap: wrap;
+            /* Tambahan untuk responsive */
+            gap: 15px;
         }
 
         .brand-title {
@@ -86,6 +91,7 @@
             font-size: 1.5rem;
             color: #fff;
             box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+            flex-shrink: 0;
         }
 
         .brand-text h1 {
@@ -106,6 +112,8 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex-wrap: wrap;
+            /* Tambahan responsif */
         }
 
         .status-pill {
@@ -155,12 +163,6 @@
             grid-template-columns: 2fr 1fr 1fr;
             gap: 20px;
             margin-bottom: 24px;
-        }
-
-        @media(max-width: 992px) {
-            .banner-audit {
-                grid-template-columns: 1fr;
-            }
         }
 
         .audit-card {
@@ -250,12 +252,6 @@
             margin-bottom: 24px;
         }
 
-        @media(max-width: 1200px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         .section-box {
             background: rgba(21, 28, 44, 0.9);
             border: 1px solid var(--border-color);
@@ -270,6 +266,8 @@
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .box-header h3 {
@@ -354,12 +352,21 @@
             transform: translateX(24px);
         }
 
-        /* Tabel Perbandingan Baku Mutu Permen LH Terbaru */
+        /* Wadah Khusus Tabel Agar Bisa Digeser di HP */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Tabel Perbandingan Baku Mutu */
         .compliance-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             font-size: 0.85rem;
+            min-width: 600px;
+            /* Lebar minimum agar tabel tidak hancur di HP */
         }
 
         .compliance-table th {
@@ -377,19 +384,20 @@
             font-weight: 600;
         }
 
-        .tag-safe {
+        .tag-safe,
+        .tag-warning {
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.75rem;
+        }
+
+        .tag-safe {
             background: rgba(16, 185, 129, 0.15);
             color: var(--accent-green);
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .tag-warning {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
             background: rgba(239, 68, 68, 0.15);
             color: var(--accent-red);
             border: 1px solid rgba(239, 68, 68, 0.3);
@@ -420,46 +428,70 @@
             font-size: 0.8rem;
             padding: 20px 0;
         }
-    </style>
-    <style>
-        /* CSS Tambahan agar konten tidak meluber ke kanan-kiri di HP */
-        body,
-        html {
-            overflow-x: hidden;
-            max-width: 100vw;
+
+        /* ========================================= */
+        /* MEDIA QUERIES KHUSUS RESPONSIVE HP & TAB  */
+        /* ========================================= */
+
+        @media(max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* Memaksa gambar dan wadah agar melar sesuai ukuran layar */
-        img,
-        table,
-        .container,
-        .card,
-        div {
-            max-width: 100% !important;
-            box-sizing: border-box;
+        @media(max-width: 992px) {
+            .banner-audit {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* Media query darurat untuk HP (Layar di bawah 768px) */
-        @media (max-width: 768px) {
-
-            /* Jika kodemu pakai flexbox, ini memaksanya turun ke bawah (vertikal) */
-            .row,
-            .d-flex,
-            .flex-row {
-                display: flex !important;
-                flex-direction: column !important;
+        @media(max-width: 768px) {
+            body {
+                padding: 12px;
             }
 
-            /* Memaksa elemen yang tadinya selebar 50% atau 33% jadi 100% (penuh) di HP */
-            .col,
-            .col-md-4,
-            .col-md-6,
-            .col-lg-3,
-            .col-lg-4,
-            .col-sm-12 {
-                width: 100% !important;
-                margin-bottom: 15px !important;
+            /* Kurangi padding di layar kecil */
+
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+                justify-content: center;
+                padding: 15px;
             }
+
+            .brand-title {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .brand-text h1 {
+                font-size: 1.3rem;
+            }
+
+            /* Kecilkan judul di HP */
+
+            .system-meta {
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                /* Paksa kartu sensor berderet ke bawah */
+            }
+
+            .box-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Tombol penuh di HP */
         }
     </style>
 </head>
@@ -634,40 +666,43 @@
             <span style="font-size: 0.8rem; color: var(--text-muted);">Standar Hukum: <b>Permen LH/BPLH RI No. 12 Tahun
                     2025</b></span>
         </div>
-        <table class="compliance-table">
-            <thead>
-                <tr>
-                    <th>Parameter Sifat Air</th>
-                    <th>Limbah Mentah (Inlet)</th>
-                    <th>Hasil Olahan SECOTIX (Outlet)</th>
-                    <th>Baku Mutu Maksimal</th>
-                    <th>Status Kepatuhan</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Derajat Keasaman (pH)</td>
-                    <td><span id="raw-ph">10.5</span> (Basa)</td>
-                    <td><span id="tab-ph">--</span></td>
-                    <td>6.0 - 9.0</td>
-                    <td><span id="tag-ph" class="tag-warning">Mengecek...</span></td>
-                </tr>
-                <tr>
-                    <td>Kekeruhan (TSS / Turbidity)</td>
-                    <td><span id="raw-turbidity">250.0</span> NTU</td>
-                    <td><span id="tab-turbidity">--</span> NTU</td>
-                    <td>&le; 50.0 NTU</td>
-                    <td><span id="tag-turbidity" class="tag-warning">Mengecek...</span></td>
-                </tr>
-                <tr>
-                    <td>Padatan Terlarut (TDS)</td>
-                    <td><span id="raw-tds">1800</span> PPM</td>
-                    <td><span id="tab-tds">--</span> PPM</td>
-                    <td>&le; 1000 PPM</td>
-                    <td><span id="tag-tds" class="tag-warning">Mengecek...</span></td>
-                </tr>
-            </tbody>
-        </table>
+
+        <div class="table-responsive">
+            <table class="compliance-table">
+                <thead>
+                    <tr>
+                        <th>Parameter Sifat Air</th>
+                        <th>Limbah Mentah (Inlet)</th>
+                        <th>Hasil Olahan SECOTIX (Outlet)</th>
+                        <th>Baku Mutu Maksimal</th>
+                        <th>Status Kepatuhan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Derajat Keasaman (pH)</td>
+                        <td><span id="raw-ph">10.5</span> (Basa)</td>
+                        <td><span id="tab-ph">--</span></td>
+                        <td>6.0 - 9.0</td>
+                        <td><span id="tag-ph" class="tag-warning">Mengecek...</span></td>
+                    </tr>
+                    <tr>
+                        <td>Kekeruhan (TSS / Turbidity)</td>
+                        <td><span id="raw-turbidity">250.0</span> NTU</td>
+                        <td><span id="tab-turbidity">--</span> NTU</td>
+                        <td>&le; 50.0 NTU</td>
+                        <td><span id="tag-turbidity" class="tag-warning">Mengecek...</span></td>
+                    </tr>
+                    <tr>
+                        <td>Padatan Terlarut (TDS)</td>
+                        <td><span id="raw-tds">1800</span> PPM</td>
+                        <td><span id="tab-tds">--</span> PPM</td>
+                        <td>&le; 1000 PPM</td>
+                        <td><span id="tag-tds" class="tag-warning">Mengecek...</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="footer">
@@ -691,7 +726,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Data Acuan Air Limbah Mentah Batik (Baseline awal)
         const RAW_INLET = { ph: 10.5, turbidity: 250.0, tds: 1800 };
         const dataLogHistory = [];
 
@@ -747,14 +781,11 @@
         // -------------------------------------------------------------
         db.ref('secotix/sensor').on('value', (snapshot) => {
             const data = snapshot.val();
-
-            // Update Status Connection Pill
             const pill = document.getElementById('connection-pill');
             pill.classList.add('active');
             document.getElementById('connection-text').innerText = 'SYSTEM LIVE';
 
             if (data) {
-                // Parsing Data (Membaca ph, pH, atau PH secara aman)
                 const ph = parseFloat(data.ph || data.pH || data.PH || 7.0);
                 const turbidity = parseFloat(data.turbidity || data.Turbidity || 0);
                 const tds = parseInt(data.tds || data.TDS || 0);
@@ -763,7 +794,6 @@
                 const power = parseFloat(data.power || 0);
                 const kwh = parseFloat(data.kwh || 0);
 
-                // 1. Display ke Kartu Metric
                 document.getElementById('val-ph').innerText = ph.toFixed(1);
                 document.getElementById('val-turbidity').innerText = turbidity.toFixed(1);
                 document.getElementById('val-tds').innerText = tds;
@@ -772,19 +802,15 @@
                 document.getElementById('val-power').innerText = power.toFixed(1);
                 document.getElementById('val-kwh').innerText = kwh.toFixed(2);
 
-                // 2. Hitung Efisiensi Reduksi Polutan (%)
                 const effTurbidity = Math.max(0, ((RAW_INLET.turbidity - turbidity) / RAW_INLET.turbidity) * 100);
                 document.getElementById('efficiency-value').innerText = effTurbidity.toFixed(1) + ' %';
 
-                // 3. Hitung Estimasi Biaya Listrik Operasional per Liter
                 const totalCostRp = kwh * 1444;
                 const costPerLiter = totalVol > 0 ? (totalCostRp / totalVol) : 0;
                 document.getElementById('cost-value').innerText = `Rp ${costPerLiter.toFixed(1)} / L`;
 
-                // 4. Analisis Baku Mutu Permen LH/BPLH RI No. 12 Tahun 2025
                 evaluateCompliance(ph, turbidity, tds);
 
-                // 5. Update Live Chart
                 const now = new Date().toLocaleTimeString('id-ID');
                 if (chart.data.labels.length > 15) {
                     chart.data.labels.shift();
@@ -798,7 +824,6 @@
                 chart.data.datasets[2].data.push(tds);
                 chart.update();
 
-                // Log untuk CSV
                 dataLogHistory.push({ time: now, ph: ph, turbidity: turbidity, tds: tds, flow: flow, kwh: kwh });
             } else {
                 document.getElementById('audit-status').innerText = 'SIAP MENERIMA DATA SENSOR';
@@ -807,7 +832,7 @@
         });
 
         // -------------------------------------------------------------
-        // 4. EVALUASI BAKU MUTU & TABEL KOMPARASI (PERMEN LH 12/2025)
+        // 4. EVALUASI BAKU MUTU & TABEL KOMPARASI
         // -------------------------------------------------------------
         function evaluateCompliance(ph, turbidity, tds) {
             document.getElementById('tab-ph').innerText = ph.toFixed(1);
@@ -815,15 +840,13 @@
             document.getElementById('tab-tds').innerText = tds;
 
             const isPhSafe = (ph >= 6.0 && ph <= 9.0);
-            const isTurbSafe = (turbidity <= 50.0); // Ambang batas TSS / Turbidity Permen LH 2025
+            const isTurbSafe = (turbidity <= 50.0);
             const isTdsSafe = (tds <= 1000);
 
-            // Update Tags Tabel
             setTag('tag-ph', isPhSafe);
             setTag('tag-turbidity', isTurbSafe);
             setTag('tag-tds', isTdsSafe);
 
-            // Update Banner Status Keseluruhan
             const bannerText = document.getElementById('audit-status');
             const bannerIcon = document.getElementById('audit-icon');
 
@@ -860,7 +883,6 @@
                 .catch(err => alert("Gagal konek Firebase: " + err.message));
         }
 
-        // Sync Switch State
         db.ref('secotix/kontrol').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -870,12 +892,10 @@
             }
         });
 
-        // Live Clock
         setInterval(() => {
             document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
         }, 1000);
 
-        // Export Data CSV Laporan
         function exportDataCSV() {
             if (dataLogHistory.length === 0) {
                 alert("Belum ada data sensor yang dapat diunduh!");
