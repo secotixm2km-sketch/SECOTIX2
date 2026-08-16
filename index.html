@@ -82,15 +82,14 @@
         }
 
         .brand-logo {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            object-fit: cover;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
-            border: 2px solid var(--accent-cyan);
+            width: 56px;
+            /* Aku besarin dikit biar detail batiknya lebih kelihatan */
+            height: 56px;
+            object-fit: contain;
+            /* Ini kuncinya biar logo utuh & nggak kepotong */
             flex-shrink: 0;
             background-color: transparent;
-            /* Ubah baris ini jadi transparent */
+            /* border dan box-shadow sengaja dihapus biar ngga numpuk! */
         }
 
         .brand-text h1 {
