@@ -788,12 +788,16 @@
                 const ph = parseFloat(data.ph || data.pH || data.PH || 7.0);
                 const turbidity = parseFloat(data.turbidity || data.Turbidity || 0);
                 const tds = parseInt(data.tds || data.TDS || 0);
+                // INI BARIS SUHU YANG KETINGGALAN:
+                const temp = parseFloat(data.temperature || data.temp || 0);
                 const power = parseFloat(data.power || 0);
                 const kwh = parseFloat(data.kwh || 0);
 
                 document.getElementById('val-ph').innerText = ph.toFixed(1);
                 document.getElementById('val-turbidity').innerText = turbidity.toFixed(1);
                 document.getElementById('val-tds').innerText = tds;
+                // INI BARIS PENAMPIL SUHU KE KARTU HTML:
+                document.getElementById('val-temp').innerText = temp.toFixed(1);
                 document.getElementById('val-power').innerText = power.toFixed(1);
                 document.getElementById('val-kwh').innerText = kwh.toFixed(2);
 
