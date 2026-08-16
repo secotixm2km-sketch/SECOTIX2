@@ -13,7 +13,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -604,8 +605,9 @@
             <div class="box-header">
                 <h3><i class="fa-solid fa-chart-area" style="color: var(--accent-cyan);"></i> Grafik Kualitas Air & Tren
                     Filtrasi</h3>
-                <button class="btn-action" onclick="exportDataCSV()">
-                    <i class="fa-solid fa-download"></i> Unduh Laporan (.CSV)
+                <button class="btn-action" onclick="exportDataPDF()"
+                    style="background: linear-gradient(135deg, var(--accent-red), #b91c1c);">
+                    <i class="fa-solid fa-file-pdf"></i> Unduh Laporan (.PDF)
                 </button>
             </div>
             <div style="position: relative; height: 340px;">
@@ -894,21 +896,49 @@
             document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
         }, 1000);
 
-        function exportDataCSV() {
+        // Fungsi Export Data ke PDF
+        function exportDataPDF() {
             if (dataLogHistory.length === 0) {
                 alert("Belum ada data sensor yang dapat diunduh!");
                 return;
             }
-            let csv = "Timestamp,pH,Turbidity (NTU),TDS (PPM),Flow Rate (L/min),Energi (kWh)\n";
+
+            // Panggil library jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Bikin Judul Dokumen PDF
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("LAPORAN AUDIT BAKU MUTU SECOTIX PRO", 14, 20);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Waktu Unduh: " + new Date().toLocaleString('id-ID') + " WIB", 14, 28);
+            doc.text("Standar Acuan: Permen LH/BPLH RI No. 12 Tahun 2025", 14, 34);
+
+            // Siapkan Kolom dan Baris Data
+            const tableColumn = ["Waktu", "pH", "Turbidity (NTU)", "TDS (PPM)", "Debit (L/min)", "Energi (kWh)"];
+            const tableRows = [];
+
             dataLogHistory.forEach(row => {
-                csv += `${row.time},${row.ph},${row.turbidity},${row.tds},${row.flow},${row.kwh}\n`;
+                const rowData = [row.time, row.ph, row.turbidity, row.tds, row.flow, row.kwh];
+                tableRows.push(rowData);
             });
-            const link = document.createElement("a");
-            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
-            link.download = `Laporan_Audit_SECOTIX_${new Date().toISOString().slice(0, 10)}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+            // Cetak Tabel ke dalam PDF
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 40,
+                theme: 'striped',
+                headStyles: { fillColor: [6, 182, 212] }, // Warna biru cyan secotix
+                styles: { fontSize: 9 }
+            });
+
+            // Simpan otomatis ke laptop/HP
+            const fileName = `Laporan_Audit_SECOTIX_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(fileName);
         }
     </script>
 </body>
