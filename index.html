@@ -536,14 +536,13 @@
                 <i class="fa-solid fa-chart-line-up"></i>
             </div>
         </div>
-
         <div class="audit-card">
             <div class="audit-info">
-                <h4>Estimasi Biaya Pengolahan</h4>
-                <div id="cost-value" class="audit-status-text" style="color: var(--accent-green);">Rp 0 / L</div>
+                <h4>Total Biaya Listrik</h4>
+                <div id="cost-value" class="audit-status-text" style="color: var(--accent-green);">Rp 0</div>
             </div>
             <div class="audit-badge-icon" style="color: var(--accent-green);">
-                <i class="fa-solid fa-coins"></i>
+                <i class="fa-solid fa-bolt-lightning"></i>
             </div>
         </div>
     </div>
@@ -580,12 +579,12 @@
 
         <div class="metric-card">
             <div class="metric-header">
-                <span>DEBIT AIR (FLOW RATE)</span>
-                <i class="fa-solid fa-gauge-high" style="color: var(--accent-cyan);"></i>
+                <span>SUHU AIR (TEMPERATURE)</span>
+                <i class="fa-solid fa-temperature-half" style="color: var(--accent-cyan);"></i>
             </div>
-            <div class="metric-value"><span id="val-flow">0.0</span> <span class="metric-unit">L/Min</span></div>
-            <div class="metric-sub" style="color: var(--text-muted);"><i class="fa-solid fa-faucet-drip"></i> Total
-                diolah: <span id="val-total-volume">0</span> Liter</div>
+            <div class="metric-value"><span id="val-temp">0.0</span> <span class="metric-unit">°C</span></div>
+            <div class="metric-sub" style="color: var(--text-muted);"><i class="fa-solid fa-thermometer"></i> Batas
+                Normal: 25 - 35 °C</div>
         </div>
 
         <div class="metric-card">
@@ -789,25 +788,20 @@
                 const ph = parseFloat(data.ph || data.pH || data.PH || 7.0);
                 const turbidity = parseFloat(data.turbidity || data.Turbidity || 0);
                 const tds = parseInt(data.tds || data.TDS || 0);
-                const flow = parseFloat(data.flow || 0);
-                const totalVol = parseFloat(data.total_volume || 0);
                 const power = parseFloat(data.power || 0);
                 const kwh = parseFloat(data.kwh || 0);
 
                 document.getElementById('val-ph').innerText = ph.toFixed(1);
                 document.getElementById('val-turbidity').innerText = turbidity.toFixed(1);
                 document.getElementById('val-tds').innerText = tds;
-                document.getElementById('val-flow').innerText = flow.toFixed(1);
-                document.getElementById('val-total-volume').innerText = totalVol.toFixed(1);
                 document.getElementById('val-power').innerText = power.toFixed(1);
                 document.getElementById('val-kwh').innerText = kwh.toFixed(2);
 
                 const effTurbidity = Math.max(0, ((RAW_INLET.turbidity - turbidity) / RAW_INLET.turbidity) * 100);
                 document.getElementById('efficiency-value').innerText = effTurbidity.toFixed(1) + ' %';
 
-                const totalCostRp = kwh * 1444;
-                const costPerLiter = totalVol > 0 ? (totalCostRp / totalVol) : 0;
-                document.getElementById('cost-value').innerText = `Rp ${costPerLiter.toFixed(1)} / L`;
+                const totalCostRp = kwh * 1444; // Tarif dasar listrik
+                document.getElementById('cost-value').innerText = `Rp ${totalCostRp.toFixed(0)}`;
 
                 evaluateCompliance(ph, turbidity, tds);
 
@@ -824,7 +818,7 @@
                 chart.data.datasets[2].data.push(tds);
                 chart.update();
 
-                dataLogHistory.push({ time: now, ph: ph, turbidity: turbidity, tds: tds, flow: flow, kwh: kwh });
+                dataLogHistory.push({ time: now, ph: ph, turbidity: turbidity, tds: tds, temp: temp, kwh: kwh });
             } else {
                 document.getElementById('audit-status').innerText = 'SIAP MENERIMA DATA SENSOR';
                 document.getElementById('audit-status').style.color = 'var(--accent-cyan)';
@@ -918,11 +912,11 @@
             doc.text("Standar Acuan: Permen LH/BPLH RI No. 12 Tahun 2025", 14, 34);
 
             // Siapkan Kolom dan Baris Data
-            const tableColumn = ["Waktu", "pH", "Turbidity (NTU)", "TDS (PPM)", "Debit (L/min)", "Energi (kWh)"];
+            const tableColumn = ["Waktu", "pH", "Turbidity (NTU)", "TDS (PPM)", "Suhu (°C)", "Energi (kWh)"];
             const tableRows = [];
 
             dataLogHistory.forEach(row => {
-                const rowData = [row.time, row.ph, row.turbidity, row.tds, row.flow, row.kwh];
+                const rowData = [row.time, row.ph, row.turbidity, row.tds, row.temp, row.kwh];
                 tableRows.push(rowData);
             });
 
